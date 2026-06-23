@@ -16,6 +16,7 @@
   let lenis = null;
   if (!reduce && window.Lenis) {
     lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true });
+    window.lenis = lenis;
     lenis.on("scroll", ({ scroll, limit }) => {
       nav.classList.toggle("scrolled", scroll > 24);
       if (progress) progress.style.transform = `scaleX(${limit ? scroll / limit : 0})`;
@@ -65,28 +66,6 @@
     });
   });
 
-  /* ---------- Avant / Après ---------- */
-  (function () {
-    const core = $("#baCore"), handle = $("#baHandle");
-    if (!core) return;
-    const set = (p) => {
-      p = Math.max(2, Math.min(98, p));
-      core.style.setProperty("--pos", p + "%");
-      handle.setAttribute("aria-valuenow", Math.round(p));
-    };
-    const fromX = (x) => { const r = core.getBoundingClientRect(); set(((x - r.left) / r.width) * 100); };
-    let drag = false;
-    core.addEventListener("pointerdown", (e) => { drag = true; fromX(e.clientX); });
-    addEventListener("pointermove", (e) => { if (drag) fromX(e.clientX); });
-    addEventListener("pointerup", () => (drag = false));
-    handle.addEventListener("keydown", (e) => {
-      const v = parseFloat(handle.getAttribute("aria-valuenow")) || 50;
-      if (e.key === "ArrowLeft") { set(v - 4); e.preventDefault(); }
-      if (e.key === "ArrowRight") { set(v + 4); e.preventDefault(); }
-    });
-    set(50);
-  })();
-
   /* ---------- Formulaire ---------- */
   const form = $("#leadForm");
   if (form) {
@@ -107,6 +86,8 @@
   if (reduce) {
     gsap.utils.toArray(".reveal, .reveal-visual").forEach((el) => gsap.set(el, { clearProps: "all" }));
     document.querySelector(".process")?.classList.add("no-pin");
+    document.querySelector(".explode")?.classList.add("no-pin");
+    gsap.set(".ex-label", { opacity: 1 });
     return;
   }
 
@@ -169,6 +150,24 @@
       onUpdate: (self) => { const p = self.progress; show(p < 0.34 ? 0 : p < 0.67 ? 1 : 2); },
     });
   });
+
+  /* Vue éclatée du véhicule (scrubbée + épinglée) */
+  if ($("#exSvg")) {
+    const exTl = gsap.timeline({
+      defaults: { duration: 1, ease: "power1.inOut" },
+      scrollTrigger: { trigger: ".explode", start: "top top", end: "bottom bottom", scrub: 0.5 },
+    });
+    exTl
+      .to("#ex-glass", { y: -148 }, 0)
+      .to("#ex-cabin", { y: -90 }, 0)
+      .to("#ex-hood", { x: 72, y: -32 }, 0)
+      .to("#ex-bumper", { x: 86 }, 0)
+      .to("#ex-door", { y: 84 }, 0)
+      .to("#ex-wheelF", { x: 64, y: 90 }, 0)
+      .to("#ex-wheelR", { x: -64, y: 90 }, 0)
+      .to("#ex-engine", { y: 118 }, 0)
+      .to(".ex-label", { opacity: 1, duration: 0.45, stagger: 0.08, ease: "power2.out" }, 0.55);
+  }
 
   /* Tilt cards (desktop pointer) */
   if (matchMedia("(hover:hover) and (pointer:fine)").matches) {
