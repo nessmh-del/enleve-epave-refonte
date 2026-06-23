@@ -86,8 +86,6 @@
   if (reduce) {
     gsap.utils.toArray(".reveal, .reveal-visual").forEach((el) => gsap.set(el, { clearProps: "all" }));
     document.querySelector(".process")?.classList.add("no-pin");
-    document.querySelector(".explode")?.classList.add("no-pin");
-    gsap.set(".ex-label", { opacity: 1 });
     return;
   }
 
@@ -150,24 +148,6 @@
       onUpdate: (self) => { const p = self.progress; show(p < 0.34 ? 0 : p < 0.67 ? 1 : 2); },
     });
   });
-
-  /* Vue éclatée du véhicule (scrubbée + épinglée) */
-  if ($("#exSvg")) {
-    const exTl = gsap.timeline({
-      defaults: { duration: 1, ease: "power1.inOut" },
-      scrollTrigger: { trigger: ".explode", start: "top top", end: "bottom bottom", scrub: 0.5 },
-    });
-    exTl
-      .to("#ex-glass", { y: -148 }, 0)
-      .to("#ex-cabin", { y: -90 }, 0)
-      .to("#ex-hood", { x: 72, y: -32 }, 0)
-      .to("#ex-bumper", { x: 86 }, 0)
-      .to("#ex-door", { y: 84 }, 0)
-      .to("#ex-wheelF", { x: 64, y: 90 }, 0)
-      .to("#ex-wheelR", { x: -64, y: 90 }, 0)
-      .to("#ex-engine", { y: 118 }, 0)
-      .to(".ex-label", { opacity: 1, duration: 0.45, stagger: 0.08, ease: "power2.out" }, 0.55);
-  }
 
   /* Tilt cards (desktop pointer) */
   if (matchMedia("(hover:hover) and (pointer:fine)").matches) {
